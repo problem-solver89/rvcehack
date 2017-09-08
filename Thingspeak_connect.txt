@@ -1,0 +1,99 @@
+//Code to upload data to the cloud.
+
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+
+int ir_left = 16;
+int ir_left_led = 14;
+int ir_right = 5;
+int ir_right_led = 13;
+int counter = 4;
+
+unsigned int count=0;
+unsigned long ir_left_detect;
+unsigned long ir_right_detect;
+int left_flag=0,right_flag=0;
+
+WiFiClient client;
+
+String thingSpeakAddress= "http://api.thingspeak.com/update?";
+String writeAPIKey;
+String tsfield1Name;
+String request_string;
+
+HTTPClient http;
+
+void setup()
+{
+   Serial.begin(115200);
+   WiFi.disconnect();
+   WiFi.begin("OnePlus 5","4cf69d4dfe20");
+  while ((!(WiFi.status() == WL_CONNECTED)))
+  {
+    delay(300); 
+  }
+  pinMode(ir_left, INPUT);
+  pinMode(ir_right, INPUT);
+  pinMode(ir_left_led, OUTPUT);
+  pinMode(ir_right_led, OUTPUT);
+  pinMode(counter, OUTPUT);
+
+  
+}
+void loop()
+{
+  
+  int ir_left_read = digitalRead(ir_left);
+  int ir_right_read = digitalRead(ir_right);
+  if(ir_left_read==0)
+  {
+    left_flag=1;
+    ir_left_detect = millis();
+    digitalWrite(ir_left_led,HIGH);
+    delay(100);
+    digitalWrite(ir_left_led,LOW);
+  }
+  if(ir_right_read==0)
+  {
+    right_flag=1;
+    ir_right_detect = millis();
+    digitalWrite(ir_right_led,HIGH);
+    delay(100);
+    digitalWrite(ir_right_led,LOW);
+  }
+  if((left_flag==1 && right_flag==1)&&(ir_right_detect > ir_left_detect))
+  {
+    left_flag=0;
+    right_flag=0;
+    if((ir_right_detect - ir_left_detect) <= 2800)
+    {
+      count++;
+     Serial.println(count);
+      digitalWrite(counter,HIGH);
+      delay(100);
+      digitalWrite(counter,LOW);
+    }
+  }
+  if (client.connect("api.thingspeak.com",80))
+   {
+      writeAPIKey = "key=JYLKR4WVJ5NPEPOC";
+      tsfield1Name = "&field1=10";
+      request_string = thingSpeakAddress;
+      request_string += "key=";
+      request_string += "WFDGGNE95KXV5DZD";
+      request_string += "&";
+      request_string += "field1";
+      request_string += "=";
+      request_string += count;
+      http.begin(request_string);
+      http.GET();
+      http.end();
+      delay(1000);
+
+    }
+
+
+}
