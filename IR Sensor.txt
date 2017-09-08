@@ -1,0 +1,63 @@
+#include <Arduino.h>
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+int ir_left = 16;
+int ir_left_led = 14;
+int ir_right = 5;
+int ir_right_led = 13;
+int counter = 4;
+
+unsigned int count=0;
+unsigned long ir_left_detect;
+unsigned long ir_right_detect;
+unsigned long interval = 1000;
+void setup()
+{
+ // Serial.begin(115200);
+  pinMode(ir_left, INPUT);
+  pinMode(ir_right, INPUT);
+  pinMode(ir_left_led, OUTPUT);
+  pinMode(ir_right_led, OUTPUT);
+  pinMode(counter, OUTPUT);
+}
+void loop()
+{
+  int ir_left_read = digitalRead(ir_left);
+  int ir_right_read = digitalRead(ir_right);
+  if(ir_left_read==0)
+  {
+    ir_left_detect = millis();
+    digitalWrite(ir_left_led,HIGH);
+    delay(300);
+    digitalWrite(ir_left_led,LOW);
+  }
+  if(ir_right_read==0)
+  {
+    ir_right_detect = millis();
+    digitalWrite(ir_right_led,HIGH);
+    delay(300);
+    digitalWrite(ir_right_led,LOW);
+  }
+  if(ir_right_detect > ir_left_detect)
+  {
+    if((ir_right_detect - ir_left_detect) <=1000)
+    {
+      count++;
+      Serial.println(count);
+      digitalWrite(counter,HIGH);
+      delay(500);
+      digitalWrite(counter,LOW);
+    }
+  }
+ /* else if(ir_right_detect < ir_left_detect)
+  {
+    if(ir_left_detect - ir_right_detect <=1000)
+    {
+        //do nothing
+    }
+  }*/
+}
