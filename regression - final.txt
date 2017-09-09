@@ -1,0 +1,43 @@
+cnt=[64,62,67,63,55,67,56,66,64,62,61,69,68,71,73,72,71,77,65,60,55,45,35,25,24,22,21,21,20,20];%Assumed data  as real time data is yet to be available
+day=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+population=78;
+p=polyfit(day,cnt,6);
+y1=polyval(p,day);
+max=0;
+k=0;
+min=y1(30);
+for i=30:-1:0
+    if(max<y1(i))
+        max=y1(i);
+    elseif(max>y1(i) && i<26)
+            k=i;
+            break;
+    end
+end
+for i=30:-1:0
+    if(min>y1(i))
+        min=y1(i);
+    elseif(min<y1(i) && i<26)
+        x=i;
+        break;
+    end
+end
+if(x>k)
+    t=x;
+else
+    t=k;
+end
+b=y1(t:30);
+c=day(t:30);
+p1=polyfit(c,b,1);
+y2=polyval(p1,b);
+z=30-t+1;
+slope=(b(z)-b(1))/(c(z)-c(1));
+disp(slope);
+if(slope>0)
+    disp('No risk');
+elseif(slope<0 && slope>-2.0)
+disp('Medium risk-Reason could be due to loss of motivation.Suggestion-Improve motivation');
+elseif(slope<-2.0)
+    disp('High risk-Reason due to technical failures such as no water or break down');
+end
